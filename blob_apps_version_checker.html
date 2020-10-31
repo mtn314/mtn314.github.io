@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <meta name="author" content="" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css">
+  </head>
+
+  <body>
+    <h1>App versions in Blobstorages</h1>
+
+    <table id="app-table" class="pure-table">
+        <thead id="app-table-head"></thead>
+        <tbody id="app-table-body"></tbody>
+    </table>
+
+    <script>
+      const envs = ["dev", "uat", "stg", "pat", ""];
+
+      const apps = [
+        "basket-provider",
+        "loyalty-dialog",
+        "shopping-bag-step-one-merchandising",
+        "quick-order-form",
+      ];
+
+      function createAppTableHeader(envs) {
+        const thead = document.getElementById("app-table-head");
+        const headerRow = document.createElement("tr");
+
+        const colEnv = document.createElement("th");
+        colEnv.appendChild(document.createTextNode("App"));
+        headerRow.appendChild(colEnv);
+        thead.appendChild(headerRow);
+
+        envs.forEach(function (env, item, array) {
+          let col = document.createElement("th");
+          col.appendChild(document.createTextNode(env ? env : "live"));
+          headerRow.appendChild(col);
+        });
+      }
+
+      function createAppTableRow(app, env) {
+        const tbody = document.getElementById("app-table-body");
+
+        let row = document.getElementById(app);
+        if (row === null) {
+          row = document.createElement("tr");
+          row.setAttribute("id", app);
+          tbody.appendChild(row);
+
+          const colApp = document.createElement("td");
+          colApp.appendChild(document.createTextNode(app));
+          row.appendChild(colApp);
+        }
+
+        const col = document.createElement("td");
+        col.setAttribute("id", `${app}-${env}`);
+
+        row.appendChild(col);
+      }
+
+      function evalAndWriteVersion(data, app, env) {
+        //read the first line that defines the version
+        var versionString = data.slice(0, data.indexOf("\n"));
+        //eval the string -> will end up with the version variable
+        eval(versionString);
+
+        document.getElementById(`${app}-${env}`).innerHTML = version;
+      }
+
+      function getAppVersion(cdnUrl, app, env) {
+        let blobUrl = new URL(app + "/index.js", cdnUrl);
+        let versionX = "";
+
+        fetch(blobUrl)
+          .then((response) => response.text())
+          .then((data) => evalAndWriteVersion(data, app, env));
+
+        // let XHR = new XMLHttpRequest();
+        // XHR.open("GET", blobUrl, true);
+        // XHR.send();
+        // XHR.onload = function () {
+        //   //read the first line that defines the version
+        //   var versionString = XHR.responseText.slice(
+        //     0,
+        //     XHR.responseText.indexOf("\n")
+        //   );
+        //   //eval the string -> will end up with the version variable
+        //   eval(versionString);
+
+        //   document.getElementById(`${app}-${env}`).innerHTML = version;
+        // };
+      }
+
+      // EXEC
+      createAppTableHeader(envs);
+
+      apps.forEach(function (app, index, array) {
+        envs.forEach(function (env, envIndex, envArray) {
+          let tmpEnv = env ? `-${env}` : "";
+
+          createAppTableRow(app, env ? env : "live");
+          getAppVersion(
+            `https://clientapp${tmpEnv}-cdn.oriflame.com/`,
+            app,
+            env ? env : "live"
+          );
+        });
+      });
+    </script>
+  </body>
+</html>
