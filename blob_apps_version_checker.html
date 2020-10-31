@@ -2,20 +2,23 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title></title>
+    <title>Blob Apps Version Checker</title>
     <meta name="author" content="" />
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css">
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/purecss@2.0.3/build/pure-min.css"
+    />
   </head>
 
   <body>
     <h1>App versions in Blobstorages</h1>
 
     <table id="app-table" class="pure-table">
-        <thead id="app-table-head"></thead>
-        <tbody id="app-table-body"></tbody>
+      <thead id="app-table-head"></thead>
+      <tbody id="app-table-body"></tbody>
     </table>
 
     <script>
@@ -73,43 +76,26 @@
         document.getElementById(`${app}-${env}`).innerHTML = version;
       }
 
-      function getAppVersion(cdnUrl, app, env) {
+      function fetchAppVersion(cdnUrl, app, env) {
         let blobUrl = new URL(app + "/index.js", cdnUrl);
         let versionX = "";
 
         fetch(blobUrl)
           .then((response) => response.text())
           .then((data) => evalAndWriteVersion(data, app, env));
-
-        // let XHR = new XMLHttpRequest();
-        // XHR.open("GET", blobUrl, true);
-        // XHR.send();
-        // XHR.onload = function () {
-        //   //read the first line that defines the version
-        //   var versionString = XHR.responseText.slice(
-        //     0,
-        //     XHR.responseText.indexOf("\n")
-        //   );
-        //   //eval the string -> will end up with the version variable
-        //   eval(versionString);
-
-        //   document.getElementById(`${app}-${env}`).innerHTML = version;
-        // };
       }
 
+      //-----------------------------------------------------------------------s
       // EXEC
       createAppTableHeader(envs);
 
       apps.forEach(function (app, index, array) {
         envs.forEach(function (env, envIndex, envArray) {
           let tmpEnv = env ? `-${env}` : "";
+          let cdnUrl = `https://clientapp${tmpEnv}-cdn.oriflame.com/`
 
           createAppTableRow(app, env ? env : "live");
-          getAppVersion(
-            `https://clientapp${tmpEnv}-cdn.oriflame.com/`,
-            app,
-            env ? env : "live"
-          );
+          fetchAppVersion(cdnUrl, app, env ? env : "live");
         });
       });
     </script>
