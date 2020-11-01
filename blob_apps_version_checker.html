@@ -16,7 +16,7 @@
   <body>
     <h1>App versions in Blobstorages</h1>
 
-    <table id="app-table" class="pure-table">
+    <table id="app-table" class="pure-table pure-table-striped">
       <thead id="app-table-head"></thead>
       <tbody id="app-table-body"></tbody>
     </table>
@@ -29,6 +29,10 @@
         "loyalty-dialog",
         "quick-order-form",
         "shopping-bag-step-one-merchandising",
+        "shopping-bag-step-one-offer-hints",
+        "shopping-bag",
+        "basket-bubble",
+        "mini-shopping-bag",
       ];
 
       function createAppTableHeader(envs) {
@@ -81,8 +85,11 @@
         let versionX = "";
 
         fetch(blobUrl)
-          .then((response) => response.text())
-          .then((data) => evalAndWriteVersion(data, app, env));
+          .then(response => response.ok ? response.text() : Promise.reject({err: response.status}))
+          .then((data) => evalAndWriteVersion(data, app, env))
+          .catch(error => {
+            //console.log('Request Failed:', error)
+          })
       }
 
       //-----------------------------------------------------------------------s
